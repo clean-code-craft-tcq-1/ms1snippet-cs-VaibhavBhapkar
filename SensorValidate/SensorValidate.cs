@@ -21,29 +21,35 @@ namespace SensorValidate
         }
         public bool ValidateSOCReadings(List<Double?> values)
         {
-            return EvaluateParameterReadings(values, _iParameterDelta.maxSOCDelta);
-        }
-        public bool ValidateCurrentReadings(List<Double?> values)
-        {
-            return EvaluateParameterReadings(values, _iParameterDelta.maxCurrentDelta);
-        }
-        private bool EvaluateParameterReadings(List<Double?> values, double maxDelta)
-        {
-            if (!CheckNullValueReadings(values))
+            if (!CheckNullValueInReadings(values))
             {
-                int lastIndex = values.Count - 1;
-                for (int i = 0; i < lastIndex; i++)
-                {
-                    if (!CheckNextAndPresentValueDifferenceWithDelta(values[i], values[i + 1], maxDelta))
-                    {
-                        return false;
-                    }
-                }
-                return true;
+                return EvaluateParameterReadings(values, _iParameterDelta.maxSOCDelta);
             }
             return false;
         }
-        private bool CheckNullValueReadings(List<Double?> values)
+        public bool ValidateCurrentReadings(List<Double?> values)
+        {
+            if (!CheckNullValueInReadings(values))
+            {
+                return EvaluateParameterReadings(values, _iParameterDelta.maxCurrentDelta);
+            }
+            return false;
+        }
+        private bool EvaluateParameterReadings(List<Double?> values, double maxDelta)
+        {
+
+            int lastIndex = values.Count - 1;
+            for (int i = 0; i < lastIndex; i++)
+            {
+                if (!CheckNextAndPresentValueDifferenceWithDelta(values[i], values[i + 1], maxDelta))
+                {
+                    return false;
+                }
+            }
+            return true;
+
+        }
+        private bool CheckNullValueInReadings(List<Double?> values)
         {
             if (values.Any(value => value == null))
             {

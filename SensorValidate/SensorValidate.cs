@@ -1,33 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SensorValidate
 {
     public class SensorValidator
     {
-        public static bool _give_me_a_good_name(double value, double nextValue, double maxDelta) {
-            if(nextValue - value > maxDelta) {
+        private readonly IParameterDelta _iParameterDelta;
+        public SensorValidator(IParameterDelta iParameterDelta)
+        {
+            this._iParameterDelta = iParameterDelta;
+        }
+        private bool CheckNextAndPresentValueDifferenceWithDelta(double? value, double? nextValue, double maxDelta)
+        {
+            if (nextValue - value > maxDelta)
+            {
                 return false;
             }
             return true;
         }
-        public static bool validateSOCreadings(List<Double> values) {
-            int lastButOneIndex = values.Count - 1;
-            for(int i = 0; i < lastButOneIndex; i++) {
-                if(!_give_me_a_good_name(values[i], values[i + 1], 0.05)) {
+        public bool ValidateSOCReadings(List<Double?> values)
+        {
+            if (!CheckNullValueInReadings(values))
+            {
+                return EvaluateParameterReadings(values, _iParameterDelta.maxSOCDelta);
+            }
+            return false;
+        }
+        public bool ValidateCurrentReadings(List<Double?> values)
+        {
+            if (!CheckNullValueInReadings(values))
+            {
+                return EvaluateParameterReadings(values, _iParameterDelta.maxCurrentDelta);
+            }
+            return false;
+        }
+        private bool EvaluateParameterReadings(List<Double?> values, double maxDelta)
+        {
+
+            int lastIndex = values.Count - 1;
+            for (int i = 0; i < lastIndex; i++)
+            {
+                if (!CheckNextAndPresentValueDifferenceWithDelta(values[i], values[i + 1], maxDelta))
+                {
                     return false;
                 }
             }
             return true;
+
         }
-        public static bool validateCurrentreadings(List<Double> values) {
-            int lastButOneIndex = values.Count - 1;
-            for(int i = 0; i < lastButOneIndex; i++) {
-                if(!_give_me_a_good_name(values[i], values[i + 1], 0.1)) {
-                    return false;
-                }
+        private bool CheckNullValueInReadings(List<Double?> values)
+        {
+            if (values.Any(value => value == null))
+            {
+                return true;
             }
-            return true;
+            return false;
         }
+
     }
 }
